@@ -1,0 +1,57 @@
+#!/bin/bash
+
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+SCRIPTNAME="$0"
+ARGS="$@"
+BRANCH="master"
+
+self_update() {
+    cd $SCRIPTPATH
+    git fetch
+
+    [ -n $(git diff --name-only origin/$BRANCH | grep $SCRIPTNAME) ] && {
+        echo "Updating..."
+        git pull --force
+        git checkout $BRANCH
+        git pull --force
+        echo "Restarting script..."
+        exec "$SCRIPTNAME" "$@"
+
+        exit 1
+    }
+}
+
+main() {
+  defaultFolders="com/skoumal/teanity/example/"
+  defaultPackageName=$(echo $defaultFolders | tr "/" ".")
+  defaultPackageName=$(sed 's/.\{1\}$//' <<< "$defaultPackageName")
+
+  cwd=$(pwd)
+  prefix="app/src/main/java/"
+
+  read -p 'Enter project name: ' projectName
+  read -p 'Enter package name: ' packageName
+
+  git clone --recurse-submodules https://github.com/skoumalcz/teanity.git $projectName --quiet && cd $projectName
+
+  rm -rf .git teanity app
+  mv quickstart app
+  git init >/dev/null
+
+  packageFolders=$(echo $packageName | tr "." "/")
+
+  mkdir -p "$prefix$packageFolders"
+
+  mv -f $prefix$defaultFolders* $prefix$packageFolders
+  find . -type d -empty -delete
+
+  if [ "$(uname)" == "Darwin" ]; then
+    LC_ALL=C find . -type f -exec sed -i '' "s/${defaultPackageName//./\\.}/${packageName//./\\.}/g" {} +
+  else
+    LC_ALL=C find . -type f -exec sed -i "s/${defaultPackageName//./\\.}/${packageName//./\\.}/g" {} \;
+  fi
+}
+
+self_update
+main
