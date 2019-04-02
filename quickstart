@@ -12,7 +12,7 @@ self_update() {
 
   ensureGit
 
-  log=`git fetch --quiet; git log HEAD.. --oneline`
+  log=`git fetch --quiet; git log HEAD..origin/master --oneline`
 
   if [[ "$log" ]]; then
       echo "Updating..."
