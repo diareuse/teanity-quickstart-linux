@@ -14,7 +14,7 @@ self_update() {
 
   log=`git fetch --quiet; git log HEAD.. --oneline`
 
-  if [[ $log = *[!\ ]* ]]; then
+  if [[ "$log" ]]; then
       echo "Updating..."
       git pull --force --quiet
       git checkout $BRANCH --quiet
