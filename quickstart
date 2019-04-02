@@ -1,25 +1,41 @@
 #!/bin/bash
 
-SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
 SCRIPTNAME="$0"
+USER_DIR=`eval echo ~$USER`
+SCRIPTPATH="$USER_DIR/.teanity-quickstart"
 ARGS="$@"
 BRANCH="master"
 
 self_update() {
-    cd $SCRIPTPATH
-    git fetch
+  cwd=`pwd`
+  cd $SCRIPTPATH
 
-    [ -n $(git diff --name-only origin/$BRANCH | grep $SCRIPTNAME) ] && {
-        echo "Updating..."
-        git pull --force
-        git checkout $BRANCH
-        git pull --force
-        echo "Restarting script..."
-        exec "$SCRIPTNAME" "$@"
+  ensureGit
 
-        exit 1
-    }
+  git fetch
+
+  [ -n $(git diff --name-only origin/$BRANCH | grep $SCRIPTNAME) ] && {
+      echo "Updating..."
+      git pull --force --quiet
+      git checkout $BRANCH --quiet
+      git pull --force --quiet
+      echo "Restarting script..."
+      exec "$SCRIPTNAME" "$@"
+      cd $cwd
+
+      exit 1
+  }
+}
+
+ensureGit() {
+  command -v git >/dev/null 2>&1 || {
+    echo "Error: install git first"
+    exit 1
+  }
+  command -v git fetch >/dev/null 2>&1 || {
+    echo "Not a git repository, failed to update"
+    exit 1
+  }
 }
 
 main() {

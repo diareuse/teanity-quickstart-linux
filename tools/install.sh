@@ -1,13 +1,18 @@
-INSTALL_DIR="~"
+#!/bin/bash
+
+INSTALL_DIR=`eval echo ~$USER`
 TEANITY_DIR=".teanity-quickstart"
 
 main() {
   ensureGit
   ensureCorrectDirectory
 
+  echo "Cloning repository..."
   cloneRepo
 
+  echo "Creating links..."
   ensureLinks
+  ensureExecutable
   ensureInstalled
 }
 
@@ -19,16 +24,22 @@ ensureGit() {
 }
 
 ensureCorrectDirectory() {
-  cd $INSTALL_DIR
+  cd "$INSTALL_DIR"
 }
 
 cloneRepo() {
-  git clone --depth=1 https://github.com/diareuse/teanity-quickstart-linux.git $TEANITY_DIR
+  git clone --depth=1 https://github.com/diareuse/teanity-quickstart-linux.git $TEANITY_DIR --quiet
 }
 
 ensureLinks() {
-  cd "$INSTALL_DIR/$TEANITY_DIR"
-  ln -s quickstart /usr/local/bin/quickstart
+  CURRENT_DIR="$INSTALL_DIR/$TEANITY_DIR"
+  cd $CURRENT_DIR
+  rm -rf /usr/local/bin/quickstart
+  ln quickstart /usr/local/bin/quickstart
+}
+
+ensureExecutable() {
+  chmod +x quickstart
 }
 
 ensureInstalled() {
