@@ -12,9 +12,7 @@ self_update() {
 
   ensureGit
 
-  git fetch
-
-  [ -n $(git diff --name-only origin/$BRANCH | grep $SCRIPTNAME) ] && {
+  if [ ! -z `git fetch; git log HEAD.. --oneline` ]; then
       echo "Updating..."
       git pull --force --quiet
       git checkout $BRANCH --quiet
@@ -24,7 +22,7 @@ self_update() {
       cd $cwd
 
       exit 1
-  }
+  fi
 }
 
 ensureGit() {
