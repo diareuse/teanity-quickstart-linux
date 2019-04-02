@@ -19,10 +19,11 @@ self_update() {
       git pull --force --quiet
       echo "Restarting script..."
       exec "$SCRIPTNAME" "$@"
-      cd $cwd
 
       exit 1
   fi
+
+  cd $cwd
 }
 
 ensureGit() {
