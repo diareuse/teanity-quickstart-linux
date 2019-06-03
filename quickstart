@@ -12,7 +12,7 @@ self_update() {
 
   ensureGit
 
-  log=`git fetch --quiet; git log HEAD..origin/master --oneline`
+  log=`git fetch --quiet; git log HEAD.. --oneline`
 
   if [[ "$log" ]]; then
       echo "Updating..."
@@ -52,8 +52,7 @@ main() {
 
   git clone --recurse-submodules https://github.com/skoumalcz/teanity.git $projectName --quiet && cd $projectName
 
-  rm -rf .git teanity app
-  mv quickstart app
+  rm -rf .git teanity
   git init >/dev/null
 
   packageFolders=$(echo $packageName | tr "." "/")
@@ -63,10 +62,17 @@ main() {
   mv -f $prefix$defaultFolders* $prefix$packageFolders
   find . -type d -empty -delete
 
+  argPackageTarget=`${defaultPackageName//./\\.}`
+  argPackageReplacement=`${packageName//./\\.}`
+  argModuleTarget="project(\"teanity\")"
+  argModuleReplacement="\"com.github.skoumalcz\", \"teanity\", \"0.+\""
+
   if [ "$(uname)" == "Darwin" ]; then
-    LC_ALL=C find . -type f -exec sed -i '' "s/${defaultPackageName//./\\.}/${packageName//./\\.}/g" {} +
+    LC_ALL=C find . -type f -exec sed -i '' "s/$argPackageTarget/$argPackageReplacement/g" {} +
+    LC_ALL=C find . -type f -exec sed -i '' "s/$argModuleTarget/$argModuleReplacement/g" {} +
   else
-    LC_ALL=C find . -type f -exec sed -i "s/${defaultPackageName//./\\.}/${packageName//./\\.}/g" {} \;
+    LC_ALL=C find . -type f -exec sed -i "s/$argPackageTarget/$argPackageReplacement/g" {} \;
+    LC_ALL=C find . -type f -exec sed -i "s/$argModuleTarget/$argModuleReplacement/g" {} \;
   fi
 }
 
