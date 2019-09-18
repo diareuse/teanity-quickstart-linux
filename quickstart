@@ -7,6 +7,7 @@ ARGS="$@"
 BRANCH="master"
 
 self_update() {
+  echo -ne "Checking for an update...\r"
   cwd=`pwd`
   cd $SCRIPTPATH
 
@@ -15,17 +16,18 @@ self_update() {
   log=`git fetch --quiet; git log HEAD.. --oneline`
 
   if [[ "$log" ]]; then
-      echo "Updating..."
+      echo -ne "Updating..."
       git pull --force --quiet
       git checkout $BRANCH --quiet
       git pull --force --quiet
-      echo "Restarting script..."
+      echo -ne "Restarting script..."
       exec "$SCRIPTNAME" "$@"
 
       exit 1
   fi
 
   cd $cwd
+  echo -e "Up-to-date ✅\r"
 }
 
 ensureGit() {
@@ -39,40 +41,51 @@ ensureGit() {
   }
 }
 
+sanitize() {
+  _input=$1
+  _input=${_input//_/}
+  _input=${_input// /_}
+  _input=${_input//[^a-zA-Z0-9_]/}
+  _input=`echo -n $_input | tr A-Z a-z`
+  echo $_input
+}
+
 main() {
-  defaultFolders="com/skoumal/teanity/example/"
+  defaultFolders="com/skoumal/teanity/app/"
   defaultPackageName=$(echo $defaultFolders | tr "/" ".")
   defaultPackageName=$(sed 's/.\{1\}$//' <<< "$defaultPackageName")
 
   cwd=$(pwd)
-  prefix="app/src/main/java/"
+  prefix="/src/main/java/"
 
   read -p 'Enter project name: ' projectName
   read -p 'Enter package name: ' packageName
 
-  git clone --recurse-submodules https://github.com/skoumalcz/teanity.git $projectName --quiet && cd $projectName
+  projectName=`sanitize $projectName`
 
-  rm -rf .git teanity
+  git clone --recurse-submodules https://github.com/diareuse/teanity-app.git $projectName --quiet && cd $projectName
+  git checkout -b one.zero --quiet
+
+  rm -rf .git .github teanity
   git init >/dev/null
 
   packageFolders=$(echo $packageName | tr "." "/")
 
-  mkdir -p "$prefix$packageFolders"
+  for i in $(ls -d */); do 
+    currentFolder=`echo ${i%%/}`
+    mkdir -p "$currentFolder$prefix$packageFolders" >/dev/null 2>&1
+    mv -f $currentFolder$prefix$defaultFolders* $currentFolder$prefix$packageFolders >/dev/null 2>&1
+  done
 
-  mv -f $prefix$defaultFolders* $prefix$packageFolders
   find . -type d -empty -delete
 
-  argPackageTarget=`${defaultPackageName//./\\.}`
-  argPackageReplacement=`${packageName//./\\.}`
-  argModuleTarget="project(\"teanity\")"
-  argModuleReplacement="\"com.github.skoumalcz\", \"teanity\", \"0.+\""
+  argPackageTarget="${defaultPackageName//./\\.}"
+  argPackageReplacement="${packageName//./\\.}"
 
   if [ "$(uname)" == "Darwin" ]; then
     LC_ALL=C find . -type f -exec sed -i '' "s/$argPackageTarget/$argPackageReplacement/g" {} +
-    LC_ALL=C find . -type f -exec sed -i '' "s/$argModuleTarget/$argModuleReplacement/g" {} +
   else
     LC_ALL=C find . -type f -exec sed -i "s/$argPackageTarget/$argPackageReplacement/g" {} \;
-    LC_ALL=C find . -type f -exec sed -i "s/$argModuleTarget/$argModuleReplacement/g" {} \;
   fi
 }
 
