@@ -1,22 +1,27 @@
 package main
 
 import (
-	"strings"
+	"flag"
 	"os"
 	"path"
+	"strings"
 
 	"./files"
 	"./githelper"
 	"./project"
 )
 
-const repoURL = "https://github.com/diareuse/teanity-app.git"
-const branch = "one.zero"
+const repoURL = "https://github.com/skoumalcz/teanity-app.git"
 const defaultPackage = "com.skoumal.teanity.app"
 
 func main() {
+	branch := flag.String("branch", "1.2", "Describes branch used to initialize this project")
+	flag.Parse()
+
+	println("Starting \"New Project Wizard\" for Teanity v" + *branch)
+
 	project := project.GetDefinition()
-	git := githelper.By(repoURL, branch, project.Name)
+	git := githelper.By(repoURL, *branch, project.Name)
 
 	git.Clone()
 	git.Init()

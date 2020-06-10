@@ -4,4 +4,14 @@ Copies the newest version and performs necessary operations like renaming packag
 
 ## Installation
 
-Visit releases for pre-built binary.
+```bash
+$ brew install go
+$ go get -v github.com/skoumalcz/teanity-quickstart
+```
+
+## Usage
+
+```bash
+$ cd ~/Projects
+$ quickstart
+```

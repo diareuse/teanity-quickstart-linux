@@ -28,7 +28,7 @@ ensureCorrectDirectory() {
 }
 
 cloneRepo() {
-  git clone --depth=1 https://github.com/diareuse/teanity-quickstart-linux.git $TEANITY_DIR --quiet
+  git clone --depth=1 https://github.com/skoumalcz/teanity-quickstart.git $TEANITY_DIR --quiet
 }
 
 ensureLinks() {
