@@ -6,7 +6,8 @@ Copies the newest version and performs necessary operations like renaming packag
 
 ```bash
 $ brew install go
-$ go get -v github.com/skoumalcz/teanity-quickstart
+$ git clone https://github.com/skoumalcz/teanity-quickstart.git /tmp/quickstart
+$ cd /tmp/quickstart && go build -o /usr/local/bin/quickstart && chmod +x /usr/local/bin/quickstart; rm -rf /tmp/quickstart
 ```
 
 ## Usage
